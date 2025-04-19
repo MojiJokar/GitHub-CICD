@@ -1,12 +1,4 @@
 name: Run Python Script with Secrets and Inputs
-# on:
-#  workflow_dispatch:
-
-# env can be outside of the body too 
-env:
-    API_KEY: ${{ secrets.API_KEY }}
-    SECRET_KEY: ${{ secrets.SECRET_KEY }}
-    INPUT_USER_INPUT: ${{ github.event.inputs.user_input }}
 
 on:
   workflow_dispatch:
@@ -15,12 +7,17 @@ on:
         description: 'Provide a workflow input'
         required: true
 
+env:
+  API_KEY: ${{ secrets.API_KEY }}
+  SECRET_KEY: ${{ secrets.SECRET_KEY }}
+  INPUT_USER_INPUT: ${{ github.event.inputs.user_input }}
+
 jobs:
   run-python:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4   # pre-package code: to download all of files and scripts that were gonna use
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -28,70 +25,71 @@ jobs:
           python-version: '3.11'
 
       - name: Run Python script
-        run: 
-            python main.py
-            # python src/main.py
-
-        # run: |
-        #     python  script1.py
-        #     python  -m pip install requests   : were using it in our python script after import , first must be installed
-        
-        # env:
-        #   API_KEY: ${{ secrets.API_KEY }}
-        #   SECRET_KEY: ${{ secrets.SECRET_KEY }}
-        #   INPUT_USER_INPUT: ${{ github.event.inputs.user_input }}
+        run: python main.py
 
   run-python-via-powershell:
-      needs : run-python
-      runs-on: ubuntu-latest
-      steps:
-        - name: Checkout code         # every time for a job we need to kind of recheck out the code
-          uses: actions/checkout@v3   # pre-package code
+    needs: run-python
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-        - name: Run Python Script Via Powershell
-          shell: pwsh
-          run: 
-            python main.py
+      - name: Run Python Script Via Powershell
+        shell: pwsh
+        run: python main.py
 
   run-python-multiple-versions:
-      needs: [run-python, run-python-via-powershell]   # needs, means these job must be finished first the,....
-      runs-on: ${{ matrix.os }}   # to run multipe verions of multiple operation we use matrix.os
-      strategy:
-        max-parallel:1   # whatever combination we have like python 3.9 , 3.10 etc  its going on parallel simeltan ,1 menas  jobs run sequentially
-        matrix:
-          os:[ubuntu-latest]
-          # os:[ubuntu-latest, windows-latest]  to run multiple os 
-          python-version:['3,9','3.10','3.11']
-        fall-fast: false
+    needs: [run-python, run-python-via-powershell]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      max-parallel: 1
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ['3.9', '3.10', '3.11']
+      fail-fast: false
 
-      steps:
-          - name: Checkout code
-            uses: actions/checkout@v3
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-          - name: Set up Python Version  ${{ matrix.python-version }}
-            uses: actions/setup-python@v4.3.0
-            id: setuppython
-            with:
-              python-version: ${{ matrix.python-version }}
+      - name: Set up Python Version ${{ matrix.python-version }}
+        uses: actions/setup-python@v4.3.0
+        with:
+          python-version: ${{ matrix.python-version }}
 
-              
-          - uses: actions/cache@v3
-            id: cache
-            with:
-              path: ${{ env.pathonLoation }} # were gonna cach the python Location 
-              key: ${{ runner.os }}-python-${{ env.pythonLocation }}-${{ hashFiles('requirements.txt') }}-test1 
+      - uses: actions/cache@v3
+        id: cache
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ runner.os }}-python-${{ env.pythonLocation }}-${{ hashFiles('requirements.txt') }}-test1
 
-          - name: Install Dependecies
-            if: steps.cashe.outputs.cache-hit  !w 'true'
-            run: pip install -r requirements.txt
+      - name: Install Dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: pip install -r requirements.txt
 
+      - name: Run Python Script
+        run: python main.py
 
-          - name: Run Python Script
-            run: main.py
+  run-python-test2:
+    needs: [run-python, run-python-via-powershell]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python Version
+        uses: actions/setup-python@v4.3.0
+        with:
+          python-version: '3.10'
 
+      - name: Cache Dependencies
+        uses: actions/cache@v4
+        id: cache2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
-
-
-
-          
-        
+      - name: Install Dependencies
+        if: steps.cache2.outputs.cache-hit != 'true'
+        run: pip install -r requirements.txt
