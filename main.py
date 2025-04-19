@@ -7,7 +7,8 @@ import os
 def main():
     # Access secrets and workflow inputs from environment variables
     api_key = os.environ.get("API_KEY")
-    user_input = os.environ.get("INPUT_USER_INPUT")
+    api_key = os.environ.get("API_KEY")
+    secret_key = os.environ.get("SECRET_KEY")
     
 
     print(f"API_KEY: {api_key}")
