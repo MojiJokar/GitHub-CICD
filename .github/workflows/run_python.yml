@@ -6,7 +6,7 @@ on:
       user_input:
         description: 'Provide a workflow input'
         required: true
-
+        
 jobs:
   run-python:
     runs-on: ubuntu-latest
