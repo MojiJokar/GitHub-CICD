@@ -2,7 +2,7 @@
 this script is   a test to  acquire the message_id of customer saved in secrets ,Actions in GitHub
 could be for  other  stuff  like   getting Authorization and permissin and etc  in Azure
 """
-import os
+# import os
 # from azure.identity import DefaultAzureCredential
 # from azure.mgmt.resource import SubscriptionClient
 
