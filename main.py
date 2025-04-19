@@ -1,7 +1,12 @@
+"""
+this script is   a test to  acquire the message_id of customer saved in secrets ,Actions in GitHub
+could be for  other  stuff  like   getting Authorization and permissin and etc  in Azure
+"""
 import os
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.resource import SubscriptionClient
 
+MESSAGE_ID = os.environ.get("message_id")
 def main():
     # Get message_id from environment variable
     MESSAGE_ID = os.environ.get("message_id")
