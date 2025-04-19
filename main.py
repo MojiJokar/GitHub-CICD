@@ -11,7 +11,7 @@ def main():
     
 
     print(f"API_KEY: {api_key}")
-    print(f"SECRET_KEY: {secret_key}")
+    # print(f"SECRET_KEY: {secret_key}")
     print(f"Workflow Input: {user_input}")
 
 if __name__ == "__main__":
