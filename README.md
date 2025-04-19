@@ -1,5 +1,5 @@
-# github_actions: 
-# Below is a simple Python script that demonstrates how to check authorizationin similar in  Azure using environment variables and the Azure Identity library and etc.
+# This setup allows you to securely pass secrets (like API keys) and workflow inputs (such as user-provided parameters) to your script.
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
 # simple practising  CI/CD  and test different  commands ,  check the  issues to see how it works and react , troubleshoot in Github with a simple Python script
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Use GitHub Action Secrets
