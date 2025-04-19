@@ -6,6 +6,13 @@ on:
       user_input:
         description: 'Provide a workflow input'
         required: true
+# env can be outside of the body too 
+# env:
+#     API_KEY: ${{ secrets.API_KEY }}
+#     SECRET_KEY: ${{ secrets.SECRET_KEY }}
+#     INPUT_USER_INPUT: ${{ github.event.inputs.user_input }}
+
+
         
 jobs:
   run-python:
