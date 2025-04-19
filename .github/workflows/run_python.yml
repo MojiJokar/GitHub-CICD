@@ -1,4 +1,12 @@
 name: Run Python Script with Secrets and Inputs
+# on:
+#  workflow_dispatch:
+
+# env can be outside of the body too 
+env:
+    API_KEY: ${{ secrets.API_KEY }}
+    SECRET_KEY: ${{ secrets.SECRET_KEY }}
+    INPUT_USER_INPUT: ${{ github.event.inputs.user_input }}
 
 on:
   workflow_dispatch:
@@ -6,18 +14,13 @@ on:
       user_input:
         description: 'Provide a workflow input'
         required: true
-# env can be outside of the body too 
-# env:
-#     API_KEY: ${{ secrets.API_KEY }}
-#     SECRET_KEY: ${{ secrets.SECRET_KEY }}
-#     INPUT_USER_INPUT: ${{ github.event.inputs.user_input }}
 
 jobs:
   run-python:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4   # pre-package code
+        uses: actions/checkout@v4   # pre-package code: to download all of files and scripts that were gonna use
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -28,8 +31,67 @@ jobs:
         run: 
             python main.py
             # python src/main.py
-        env:
-          API_KEY: ${{ secrets.API_KEY }}
-          SECRET_KEY: ${{ secrets.SECRET_KEY }}
-          INPUT_USER_INPUT: ${{ github.event.inputs.user_input }}
+
+        # run: |
+        #     python  script1.py
+        #     python  -m pip install requests   : were using it in our python script after import , first must be installed
+        
+        # env:
+        #   API_KEY: ${{ secrets.API_KEY }}
+        #   SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        #   INPUT_USER_INPUT: ${{ github.event.inputs.user_input }}
+
+  run-python-via-powershell:
+      needs : run-python
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout code         # every time for a job we need to kind of recheck out the code
+          uses: actions/checkout@v3   # pre-package code
+
+        - name: Run Python Script Via Powershell
+          shell: pwsh
+          run: 
+            python main.py
+
+  run-python-multiple-versions:
+      needs: [run-python, run-python-via-powershell]   # needs, means these job must be finished first the,....
+      runs-on: ${{ matrix.os }}   # to run multipe verions of multiple operation we use matrix.os
+      strategy:
+        max-parallel:1   # whatever combination we have like python 3.9 , 3.10 etc  its going on parallel simeltan ,1 menas  jobs run sequentially
+        matrix:
+          os:[ubuntu-latest]
+          # os:[ubuntu-latest, windows-latest]  to run multiple os 
+          python-version:['3,9','3.10','3.11']
+        fall-fast: false
+
+      steps:
+          - name: Checkout code
+            uses: actions/checkout@v3
+
+          - name: Set up Python Version  ${{ matrix.python-version }}
+            uses: actions/setup-python@v4.3.0
+            id: setuppython
+            with:
+              python-version: ${{ matrix.python-version }}
+
+              
+          - uses: actions/cache@v3
+            id: cache
+            with:
+              path: ${{ env.pathonLoation }} # were gonna cach the python Location 
+              key: ${{ runner.os }}-python-${{ env.pythonLocation }}-${{ hashFiles('requirements.txt') }}-test1 
+
+          - name: Install Dependecies
+            if: steps.cashe.outputs.cache-hit  !w 'true'
+            run: pip install -r requirements.txt
+
+
+          - name: Run Python Script
+            run: main.py
+
+
+
+
+
+          
         
